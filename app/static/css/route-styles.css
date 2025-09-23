@@ -1,0 +1,100 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+#map {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+#rotulo {
+    margin-right: 8px;
+}
+
+.search-bar {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    margin-right: 10px;
+    width: 300px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.search-bar button {
+    font-size: 16px;
+    padding: 10px 20px;
+    height: 40px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar button:hover,
+.search-bar button:focus {
+    background-color: #004494;
+}
+
+.controls {
+    position: absolute;
+    flex-wrap: wrap;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+.controls button {
+    font-size: 16px;
+    padding: 10px 20px;
+    height: 40px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.controls button:hover,
+.controls button:focus {
+    background-color: #004494;
+}
+
+.controls a {
+    font-size: 16px;
+    padding: 10px 20px;
+    height: 40px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.controls a:hover,
+.controls a:focus {
+    background-color: #5a6268;
+}

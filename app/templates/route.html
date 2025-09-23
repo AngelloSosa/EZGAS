@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruta a Estaciones de Servicio</title>
+
+    <!-- Agregar Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/route-styles.css') }}">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmJAtNgT-NLzt7drTAUXBSG0FqEFwasiE&libraries=places,directions&callback=initMap"
+        async defer></script>
+
+</head>
+
+<body>
+    <div class="search-bar">
+        <input id="address" type="text" class="form-control" placeholder="Ingresa una dirección">
+        <select id="province-filter" class="form-control">
+            <option value="">Seleccione una provincia</option>
+            <!-- Aquí puedes llenar las provincias de forma dinámica desde el backend -->
+            <option value="Albacete">Albacete</option>
+            <option value="Alicante">Alicante</option>
+            <option value="Almería">Almería</option>
+            <option value="Álava">Álava</option>
+            <option value="Asturias">Asturias</option>
+            <option value="Barcelona">Barcelona</option>
+            <!-- Agrega más opciones según sea necesario -->
+        </select>
+        <select id="rotulo-filter" class="form-control">
+            <option value="">Seleccione una marca</option>
+            <option value="Repsol">REPSOL</option>
+            <option value="Cepsa">CEPSA</option>
+            <option value="Shell">SHELL</option>
+        </select>
+        <button id="search-address" class="btn btn-primary">Buscar</button>
+    </div>
+    <div id="map"></div>
+    <div class="controls">
+        <button id="use-current-location" class="btn btn-primary">Usar mi ubicación actual</button>
+        <button id="calcular-ruta" class="btn btn-primary">Visualizar ruta óptima</button>
+        <a href="/" class="btn">Volver</a>
+    </div>
+    <input type="text" id="location" class="form-control" placeholder="Ingresa tu ubicación (lat, lng)"
+        style="display: none;">
+
+    <script>
+        let map;
+        let initialMarker = null;
+        let stationMarkers = [];
+        let geocoder;
+        let autocomplete;
+        let directionsService;
+        let directionsRenderer;
+        let selectedStationMarker = null;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: { lat: 40.4168, lng: -3.7038 },
+            });
+
+            const trafficLayer = new google.maps.TrafficLayer();
+            trafficLayer.setMap(map);
+
+            geocoder = new google.maps.Geocoder();
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+
+            autocomplete = new google.maps.places.Autocomplete(document.getElementById('address'));
+            autocomplete.bindTo('bounds', map);
+
+            autocomplete.addListener('place_changed', function () {
+                const place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    alert("No details available for input: '" + place.name + "'");
+                    return;
+                }
+                const pos = {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                };
+                setInitialMarker(pos);
+                map.setCenter(pos);
+                map.setZoom(16);
+            });
+
+            google.maps.event.addListener(map, 'click', function (event) {
+                setInitialMarker({
+                    lat: event.latLng.lat(),
+                    lng: event.latLng.lng()
+                });
+            });
+        }
+
+        function setInitialMarker(pos) {
+            if (initialMarker) {
+                initialMarker.setMap(null);
+            }
+            initialMarker = new google.maps.Marker({
+                position: pos,
+                map: map
+            });
+            document.getElementById('location').value = pos.lat + ', ' + pos.lng;
+        }
+
+        function clearStationMarkers() {
+            stationMarkers.forEach(marker => marker.setMap(null));
+            stationMarkers = [];
+        }
+
+        async function geocodeAddress(address, rotulo) {
+            geocoder.geocode({ 'address': address }, async function (results, status) {
+                if (status === 'OK') {
+                    const pos = {
+                        lat: results[0].geometry.location.lat(),
+                        lng: results[0].geometry.location.lng()
+                    };
+                    setInitialMarker(pos);
+                    map.setCenter(pos);
+                    map.setZoom(16);
+
+                    await fetchGasStationsByRotulo(pos, rotulo);
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        }
+
+        async function fetchGasStationsByRotulo(position, rotulo) {
+            const province = document.getElementById('province-filter').value;
+            if (!province) {
+                alert("Por favor, selecciona una provincia.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/filtered_gas_stations?lat=${position.lat}&lng=${position.lng}&rotulo=${rotulo}&provincia=${province}`);
+                const stations = await response.json();
+
+                clearStationMarkers();
+                let closestStation = null;
+
+                // Backend ya calcula las distancias y devuelve las estaciones filtradas
+                stations.forEach(station => {
+                    const stationMarker = new google.maps.Marker({
+                        position: { lat: station.latitud, lng: station.longitud },
+                        map: map,
+                        icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                    });
+
+                    stationMarker.addListener('click', function () {
+                        if (selectedStationMarker) {
+                            selectedStationMarker.setIcon("http://maps.google.com/mapfiles/ms/icons/blue-dot.png");
+                        }
+                        selectedStationMarker = stationMarker;
+                        selectedStationMarker.setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                    });
+
+                    stationMarkers.push(stationMarker);
+                });
+
+                if (stations.length > 0) {
+                    // Marcar la estación más cercana si el backend ya la identifica
+                    const closest = stations[0];
+                    const closestMarker = new google.maps.Marker({
+                        position: { lat: closest.latitud, lng: closest.longitud },
+                        map: map,
+                        icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                    });
+                    stationMarkers.push(closestMarker);
+                    selectedStationMarker = closestMarker;
+                }
+            } catch (error) {
+                console.error('Error al obtener las estaciones de servicio:', error);
+            }
+        }
+
+
+
+
+        function useCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    setInitialMarker(pos);
+                    map.setCenter(pos);
+                    map.setZoom(16);
+                }, function () {
+                    handleLocationError(true, map.getCenter());
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                handleLocationError(false, map.getCenter());
+            }
+        }
+
+        function handleLocationError(browserHasGeolocation, pos) {
+            const infoWindow = new google.maps.InfoWindow({ map: map });
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: El servicio de geolocalización falló.' :
+                'Error: Tu navegador no soporta geolocalización.');
+        }
+
+        async function calcularRuta() {
+        if (!initialMarker || !selectedStationMarker) {
+            alert('Por favor, ingresa una dirección y selecciona una estación de servicio.');
+            return;
+        }
+
+        const province = document.getElementById('province-filter').value;
+        if (!province) {
+            alert("Por favor, selecciona una provincia.");
+            return;
+        }
+
+        const startPos = initialMarker.getPosition();
+        const endPos = selectedStationMarker.getPosition();
+
+        try {
+            const response = await fetch('/calculate_prim_route', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    provincia: province,
+                    lat: startPos.lat(),
+                    lng: startPos.lng(),
+                    target_lat: endPos.lat(),
+                    target_lng: endPos.lng()
+                })
+            });
+            const data = await response.json();
+
+            if (data.mst) {
+                directionsRenderer.set('directions', null);
+
+                const pathCoordinates = data.mst.map(edge => ({
+                    lat: parseFloat(edge.lat),
+                    lng: parseFloat(edge.lng)
+                }));
+                const routePath = new google.maps.Polyline({
+                    path: pathCoordinates,
+                    geodesic: true,
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2
+                });
+                routePath.setMap(map);
+
+                const waypoints = pathCoordinates.slice(1, -1).map(coord => ({
+                    location: new google.maps.LatLng(coord.lat, coord.lng),
+                    stopover: false
+                }));
+
+                const request = {
+                    origin: new google.maps.LatLng(startPos.lat(), startPos.lng()),
+                    destination: new google.maps.LatLng(endPos.lat(), endPos.lng()),
+                    waypoints: waypoints,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                directionsService.route(request, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        directionsRenderer.setDirections(result);
+                    } else {
+                        alert('No se pudo calcular la ruta: ' + status);
+                    }
+                });
+            } else {
+                alert('No se pudo calcular la ruta óptima: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error al calcular la ruta óptima:', error);
+        }
+    }
+
+
+        document.getElementById('use-current-location').addEventListener('click', function (e) {
+            e.preventDefault();
+            useCurrentLocation();
+        });
+
+        document.getElementById('calcular-ruta').addEventListener('click', function (e) {
+            e.preventDefault();
+            calcularRuta();
+        });
+
+        document.getElementById('search-address').addEventListener('click', function (e) {
+            e.preventDefault();
+            const address = document.getElementById('address').value;
+            const rotulo = document.getElementById('rotulo-filter').value;
+            const province = document.getElementById('province-filter').value;
+
+            if (address && province) {
+                geocodeAddress(address, rotulo);
+            } else {
+                alert("Por favor, ingresa una dirección y selecciona una provincia.");
+            }
+        });
+
+        document.getElementById('rotulo-filter').addEventListener('change', function () {
+            const address = document.getElementById('address').value;
+            const rotulo = this.value;
+            const province = document.getElementById('province-filter').value;
+
+            if (address && province) {
+                geocodeAddress(address, rotulo);
+            } else {
+                alert("Por favor, selecciona una provincia.");
+            }
+        });
+
+        document.getElementById('province-filter').addEventListener('change', async function () {
+            const province = this.value;
+
+            if (province) {
+                try {
+                    const response = await fetch('/load_province', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provincia: province })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(`Grafo de ${province} cargado correctamente (${data.nodes} estaciones).`);
+                    } else {
+                        alert(`Error al cargar el grafo: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar el grafo:', error);
+                    alert('Error al cargar el grafo. Revisa la consola para más detalles.');
+                }
+            }
+        });
+
+    </script>
+
+    <!-- Agregar Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

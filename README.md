@@ -1,2 +1,0 @@
-# EZGAS
-Project using python

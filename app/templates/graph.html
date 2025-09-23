@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de {{ provincia }}</title>
+
+    <!-- Agregar Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Mapa Interactivo: {{ provincia }}</h1>
+        <div id="map"></div>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Volver</a>
+        </div>
+    </div>
+
+    <script>
+        const estaciones = JSON.parse(`{{ estaciones | tojson | safe }}`);
+
+        // Crear el mapa centrado en la primera estación
+        const map = L.map('map').setView([estaciones[0].latitud, estaciones[0].longitud], 13);
+
+        // Agregar capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Agregar marcadores para cada estación
+        estaciones.forEach(estacion => {
+            L.marker([estacion.latitud, estacion.longitud])
+                .addTo(map)
+        });
+    </script>
+
+    <!-- Agregar Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

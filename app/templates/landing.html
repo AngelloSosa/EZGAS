@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZGAS</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Archivo CSS Personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-styles.css') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="bg-dark text-white">
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">EZGAS</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#quienes-somos">Quiénes Somos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#que-ofrecemos">Qué Ofrecemos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#caracteristicas">Características</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-danger" href="{{ url_for('mostrar_ruta') }}">Ir a la Aplicación</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="hero text-center py-5">
+            <h1 class="display-4">Bienvenido a EZGAS</h1>
+            <p class="lead">Encuentra las estaciones de gasolina más cercanas y optimiza tus rutas de transporte.</p>
+            <a href="#que-ofrecemos" class="btn btn-light btn-lg mt-3">Descubre Más</a>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <section id="quienes-somos" class="text-center mb-5">
+            <h2 class="text-primary">Quiénes Somos</h2>
+            <p class="lead text-size">Somos un equipo comprometido en ofrecer soluciones tecnológicas innovadoras para la gestión de estaciones de gasolina. Nuestra misión es facilitar el acceso a información vital para optimizar el transporte y el consumo de combustible.</p>
+            <img src="https://www.ace-cargadores.com/wp-content/uploads/2020/07/16-07-2020-gasnam.jpg" alt="Quiénes Somos" class="img-fluid rounded shadow mb-4 img-size" data-aos="fade-up">
+        </section>
+
+        <section id="que-ofrecemos" class="text-center mb-5">
+            <h2 class="text-primary">Qué Ofrecemos</h2>
+            <p class="text-size">Utilizamos algoritmos avanzados para encontrar las rutas más eficientes y reducir costos de transporte, mejorando la eficiencia y reduciendo el impacto ambiental.</p>
+            <img src="https://mecaluxco.cdnwm.com/img/blog/gestion-rutas.1.12.jpg" alt="Qué Ofrecemos" class="img-fluid rounded shadow mb-4 img-size" data-aos="fade-up">
+        </section>
+
+        <section id="caracteristicas" class="mb-5">
+            <h2 class="text-center text-primary">Características</h2>
+            <div class="row">
+                <div class="col-lg-4 text-center mb-4">
+                    <div class="card shadow animated-card h-100">
+                        <img src="https://www.muycomputer.com/wp-content/uploads/2021/09/Mapas-4.jpg" class="card-img-top img-size" alt="Rutas Óptimas">
+                        <div class="card-body">
+                            <h5 class="card-title">Rutas Óptimas</h5>
+                            <p class="card-text">Identificamos las rutas más eficientes para tu viaje, ahorrando tiempo y combustible.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center mb-4">
+                    <div class="card shadow animated-card h-100">
+                        <img src="https://i.blogs.es/01bf9b/google-mapss/450_1000.webp" class="card-img-top img-size" alt="Actualizaciones en Tiempo Real">
+                        <div class="card-body">
+                            <h5 class="card-title">Actualizaciones en Tiempo Real</h5>
+                            <p class="card-text">Recibe información sobre el tráfico y condiciones de las rutas en tiempo real.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center mb-4">
+                    <div class="card shadow animated-card h-100">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4yOqz82MaSMtCeSqHV1_xpyt8gRTU4szbpw&s" class="card-img-top img-size" alt="Análisis de Costos">
+                        <div class="card-body">
+                            <h5 class="card-title">Análisis de Costos</h5>
+                            <p class="card-text">Analiza los costos de combustible y transporte para optimizar tu presupuesto.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-light text-center py-4">
+        <p>&copy; 2024 GasStationApp. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+        // Cambiar el color de la barra de navegación al hacer scroll
+        window.onscroll = function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-darker');
+            } else {
+                navbar.classList.remove('bg-darker');
+            }
+        };
+    </script>
+</body>
+</html>
