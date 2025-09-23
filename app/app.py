@@ -11,10 +11,6 @@ import math
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    from os import environ
-    app.run(host="0.0.0.0", port=int(environ.get("PORT", 5000)))
-
 # Diccionario para almacenar los subgrafos de cada localidad
 subgrafos = {}
 
@@ -383,9 +379,9 @@ def mostrar_ruta():
             {"latitud": data['latitud'], "longitud": data['longitud']}
             for _, data in subgrafo.nodes(data=True)
         ])
-
     return render_template('route.html', estaciones=estaciones)
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    from os import environ
+    app.run(host="0.0.0.0", port=int(environ.get("PORT", 5000)))
