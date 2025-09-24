@@ -10,6 +10,7 @@ from heapq import heappop, heappush
 import math
 
 app = Flask(__name__)
+api_key = os.getenv("GOOGLE_MAPS_API_KEY")
 
 # Diccionario para almacenar los subgrafos de cada localidad
 subgrafos = {}
@@ -95,7 +96,7 @@ def get_subgraph():
     
 def obtener_datos_trafico(lat, lng):
     """Obtiene datos de tráfico vehicular usando Google Maps Traffic API."""
-    API_KEY = "AIzaSyAmJAtNgT-NLzt7drTAUXBSG0FqEFwasiE"
+    API_KEY = api_key
     url = f"https://maps.googleapis.com/maps/api/distancematrix/json"
     
     # Configura una solicitud a la API de tráfico
