@@ -380,4 +380,4 @@ def mostrar_ruta():
             {"latitud": data['latitud'], "longitud": data['longitud']}
             for _, data in subgrafo.nodes(data=True)
         ])
-    return render_template('route.html', estaciones=estaciones)
+    return render_template('route.html', estaciones=estaciones, api_key=os.getenv("GOOGLE_MAPS_API_KEY"))
