@@ -11,9 +11,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/route-styles.css') }}">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmJAtNgT-NLzt7drTAUXBSG0FqEFwasiE&libraries=places,directions&callback=initMap"
-        async defer></script>
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&libraries=places,directions&callback=initMap">
+    </script>
 
 </head>
 
